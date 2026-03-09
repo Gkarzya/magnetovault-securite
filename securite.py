@@ -6,6 +6,7 @@ from google import genai
 from streamlit_paste_button import paste_image_button
 import os
 import base64
+import re
 
 # =========================================================
 # CONFIGURATION DE LA PAGE & PLEIN ÉCRAN (UI CLEANUP)
@@ -26,6 +27,17 @@ header {background-color: transparent !important;}
     font-size: 24px !important;
     font-weight: bold !important;
     padding: 5px 10px !important;
+}
+
+/* Centrer PARFAITEMENT les images (drapeaux) dans leurs colonnes */
+div[data-testid="stImage"] {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
+div[data-testid="stImage"] > img {
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 </style>
 """
@@ -452,6 +464,8 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
         if "etape_dmi" not in st.session_state: st.session_state.etape_dmi = 0
         if "nom_dmi_memoire" not in st.session_state: st.session_state.nom_dmi_memoire = ""
         if "sources_ia" not in st.session_state: st.session_state.sources_ia = ""
+        if "fiche_ia" not in st.session_state: st.session_state.fiche_ia = ""
+        if "rapport_final" not in st.session_state: st.session_state.rapport_final = ""
         
         # --- ÉTAPE 1 : IDENTIFICATION ---
         st.markdown(T("### 1️⃣ Identification du dispositif", "### 1️⃣ Device Identification"))
@@ -498,15 +512,33 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
         if st.button(T("🔍 1. Rechercher le constructeur et les accès", "🔍 1. Search manufacturer & access"), use_container_width=True):
             if nom_dmi or image_fournie:
                 st.session_state.etape_dmi = 1
-                with st.spinner(T("Analyse approfondie et recherche en cours...", "In-depth analysis and search in progress...")):
+                with st.spinner(T("Analyse approfondie par Gemini en cours...", "Deep analysis by Gemini in progress...")):
                     
                     prompt_sources = f"""
-                    Agis comme un moteur de recherche ultra-précis spécialisé en dispositifs médicaux implantables (DMI). 
-                    Nom saisi : "{nom_dmi if nom_dmi else "Aucun texte saisi. LIS L'IMAGE CI-JOINTE."}"
+                    Tu es un expert mondial en sécurité IRM et dispositifs médicaux implantables (DMI).
+                    Dispositif identifié : "{nom_dmi if nom_dmi else "Aucun texte saisi. LIS L'IMAGE CI-JOINTE."}"
                     
-                    MISSION :
-                    1. Extraire Fabricant et Modèle.
-                    2. Générer une stratégie de recherche "anti-lien mort" en 3 options (Portail IRM, Accueil, Recherche Google).
+                    MISSION : Fournir un résumé clinique ultra-pertinent et des liens d'accès directs aux manuels du fabricant.
+                    Utilise toute l'étendue de ta base de données pour donner les informations les plus précises possibles dès maintenant. Ne sois pas trop restrictif, donne les informations cliniques que tu connais (SAR, B0, mode IRM, etc.).
+                    
+                    Format de réponse OBLIGATOIRE (en Markdown) :
+                    
+                    ### 🆔 Identification du Dispositif
+                    * **Fabricant :** [Nom du constructeur]
+                    * **Modèle / Type :** [Modèle précis]
+                    * **Type de DMI :** [Actif / Passif]
+                    
+                    ### 🧠 Analyse Préliminaire de Sécurité (Base IA)
+                    * 🧲 **Champ Magnétique (B0) :** [ex: 1.5T, 3T, ou Contre-indiqué]
+                    * 🌡️ **SAR Max / B1+rms :** [ex: 2.0 W/kg, 2.8 µT, etc.]
+                    * ⚠️ **Restrictions & Vigilance :** [Détaille les zones d'exclusion, le mode IRM à activer, le temps de scan max, etc.]
+                    *(Note: Ces informations sont des indications préliminaires fournies par l'IA. La validation stricte via le manuel officiel reste obligatoire).*
+                    
+                    ### 🎯 Liens d'Accès Direct (Sources Constructeur)
+                    Trouve les liens les plus directs et pertinents vers les documents officiels.
+                    * 🏛️ **Portail Officiel / Manuel :** [Génère l'URL la plus directe possible vers le manuel IRM ou le portail constructeur de ce dispositif]
+                    * 🔍 **Recherche Spécifique :** [Génère un lien de recherche Google très ciblé, ex: https://www.google.com/search?q=%22nom_du_fabricant%22+%22nom_du_modele%22+%22MRI+Safety%22+manual+OR+pdf]
+                    * 🌍 **Base MRISafety.com :** [Lien vers la recherche MRISafety](https://www.mrisafety.com/TheList/Search?q={nom_dmi.replace(' ', '+') if nom_dmi else 'implant'})
                     """
                     
                     contenu_etape1 = [prompt_sources]
@@ -535,3 +567,154 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
         if st.session_state.etape_dmi >= 1:
             st.markdown(st.session_state.sources_ia)
             st.divider()
+
+            # --- ÉTAPE 2 : VALIDATION & EXTRACTION DES CONDITIONS ---
+            st.markdown(T("### 2️⃣ Validation et Conditions IRM", "### 2️⃣ Validation and MRI Conditions"))
+            st.info(T("Allez sur le portail du fabricant grâce aux liens ci-dessus, copiez le texte des conditions de sécurité IRM et collez-le ci-dessous.", 
+                      "Go to the manufacturer's portal using the links above, copy the MRI safety conditions text, and paste it below."))
+            
+            texte_manuel = st.text_area(T("Collez les données brutes du fabricant ici :", "Paste raw manufacturer data here:"), height=150)
+
+            if st.button(T("⚙️ 2. Analyser les conditions de sécurité", "⚙️ 2. Analyze safety conditions"), use_container_width=True):
+                if texte_manuel:
+                    st.session_state.etape_dmi = 2
+                    with st.spinner(T("Extraction ultra-rapide des constantes physiques...", "Ultra-fast extraction of physical constants...")):
+                        
+                        prompt_analyse = f"""
+                        Agis comme un expert médico-légal en sécurité IRM. 
+                        Analyse ce texte officiel du fabricant et extrais UNIQUEMENT les conditions de sécurité pour l'IRM.
+                        Texte du fabricant : "{texte_manuel}"
+
+                        RÈGLES STRICTES :
+                        - Rendu sous forme de liste à puces.
+                        - AUCUNE phrase d'introduction ou de conclusion.
+                        - Si une information est absente du texte, écris "Non spécifié".
+
+                        Génère UNIQUEMENT ce format :
+                        * 🧲 **Champ Magnétique Autorisé :** [Ex: 1.5T, 3T]
+                        * 🌡️ **SAR Maximum :** [Ex: 2.0 W/kg (Corps entier)]
+                        * ⚡ **B1+rms Maximum :** [Ex: 2.8 µT]
+                        * 📐 **Gradient Spatial Max :** [Ex: 3000 Gauss/cm]
+                        * 🚫 **Contraintes cliniques / Exclusions :** [Ex: Scan de la tête uniquement, mode normal obligatoire, etc.]
+                        """
+                        try:
+                            reponse_analyse = client.models.generate_content(model='gemini-2.5-flash', contents=[prompt_analyse])
+                            st.session_state.fiche_ia = reponse_analyse.text
+                        except Exception as e:
+                            st.error(f"Erreur IA : {e}")
+                else:
+                    st.warning(T("Veuillez coller le texte du manuel avant d'analyser.", "Please paste the manual text before analyzing."))
+
+        if st.session_state.etape_dmi >= 2:
+            st.success(T("✅ Analyse terminée. Voici les conditions à respecter :", "✅ Analysis complete. Here are the conditions to respect:"))
+            st.markdown(st.session_state.fiche_ia)
+            st.divider()
+
+            # --- ÉTAPE 3 : GÉNÉRATION DU RAPPORT (FICHE VISUELLE AVANCÉE) ---
+            st.markdown(T("### 3️⃣ Génération de la Fiche Clinique", "### 3️⃣ Clinical Form Generation"))
+            st.info(T("Générez la fiche de compatibilité au format visuel original, prête à être imprimée ou copiée dans le DPI.",
+                      "Generate the compatibility form in its original visual format, ready to be printed or copied into the EPR."))
+
+            if st.button(T("📝 3. Remplir la Fiche Clinique (Modèle Original)", "📝 3. Fill Clinical Form (Original Model)"), use_container_width=True):
+                st.session_state.etape_dmi = 3
+                with st.spinner(T("Création de la mise en page originale...", "Creating original layout...")):
+                    prompt_rapport = f"""
+                    Agis comme un assistant médical expert. 
+                    Tu dois remplir la fiche ci-dessous en utilisant ces données :
+                    Dispositif : {nom_dmi}
+                    Données constructeur : {texte_manuel}
+                    Analyse IA : {st.session_state.fiche_ia}
+
+                    CONSIGNES STRICTES :
+                    - Reproduis EXACTEMENT le code HTML ci-dessous. Ne change aucune balise, aucune couleur.
+                    - Remplace les "[ ]" par "[X]" si la condition est validée.
+                    - Remplace "[À compléter]" par les informations trouvées.
+                    - Mets OBLIGATOIREMENT ton résultat dans un bloc de code commençant par ```html et se terminant par ```.
+                    
+                    MODÈLE HTML À REPRODUIRE ET REMPLIR :
+
+                    ```html
+                    <div style="font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: white; color: black;">
+                        <h2 style='text-align: center; color: #1f497d; text-decoration: underline;'>Fiche de compatibilité IRM pour patient porteur de DMI</h2>
+                        
+                        <p><strong>Patient</strong><br>
+                        <strong>Nom :</strong> [À compléter] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Prénom :</strong> [À compléter]<br>
+                        <strong>Né(e) le :</strong> [À compléter] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>examen IRM le :</strong> [À compléter] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>type :</strong> [À compléter]<br>
+                        <strong>Tél :</strong> [À compléter]</p>
+
+                        <div style="border: 2px solid black; padding: 10px; margin-bottom: 10px;">
+                            <h3 style="color: #4472c4; margin-top: 0;">Compatibilité IRM</h3>
+                            <p style="font-size: 18px; text-align: center; font-weight: bold;">
+                                [ ] MR Safe &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] MR Conditional &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] MR Unsafe
+                            </p>
+                            <p style="color: red; font-weight: bold; text-align: center; font-size: 18px;">
+                                Toute association de dispositifs médicaux non testés ensemble est considérée comme Unsafe
+                            </p>
+                        </div>
+
+                        <h3 style="color: #4472c4; text-decoration: underline;">Dispositifs Médicaux</h3>
+                        <table style="width: 100%; border-collapse: collapse; text-align: center;" border="1">
+                            <tr style="background-color: #f2f2f2;">
+                                <th style="padding: 5px;">Type</th><th style="padding: 5px;">Marque</th><th style="padding: 5px;">Référence</th><th style="padding: 5px;">Date de pose</th><th style="padding: 5px;">Compatibilité</th>
+                            </tr>
+                            <tr><td style="padding: 5px;">[À compléter]</td><td style="padding: 5px;">[À compléter]</td><td style="padding: 5px;">[À compléter]</td><td style="padding: 5px;">[À compléter]</td><td style="padding: 5px;">[À compléter]</td></tr>
+                            <tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr>
+                            <tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr>
+                        </table>
+
+                        <p style="margin-top: 15px;">
+                            <strong>Type de DMI :</strong> [ ] Actif <span style="color: red; font-weight: bold;">-&gt; Risque de dysfonctionnement</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Passif <br>
+                            <strong>Matériau ferromagnétique :</strong> [ ] Oui <span style="color: red; font-weight: bold;">-&gt; Risque d'attraction, de torsion...</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non <br>
+                            <strong>Matériau Conducteur :</strong> [ ] Oui <span style="color: red; font-weight: bold;">-&gt; Risque d'échauffement</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non
+                        </p>
+
+                        <div style="border: 2px solid black; padding: 15px;">
+                            <h3 style="color: #4472c4; text-decoration: underline; margin-top: 0;">Conditions préconisées par le constructeur</h3>
+                            
+                            <strong>Champ Magnétique statique max (B0) :</strong> [ ] 1.5 T &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] 3T <br>
+                            <strong>Gradients spatial max (T/m) :</strong> [À compléter] <br>
+                            <strong>Vitesse de montée des gradients (T/m/s) :</strong> [À compléter] <br>
+                            <strong>Amplitude max des gradients (mT/m) :</strong> [À compléter] <br>
+                            <strong>SAR :</strong> [ ] Niveau 1 (2,0 W/kg Corps et 3,2 W/kg Tête) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Niveau 2 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Autre : [À compléter]<br>
+                            <strong>B1+RMS :</strong> [ ] ≤ 2,8 µT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Autre : [À compléter] <br>
+                            <strong>Temps d'examen maximum (balayage RF) :</strong> [À compléter] <br><br>
+                            
+                            <strong>Antennes :</strong> [À compléter] <br>
+                            <strong>Zone d'exclusion :</strong> [ ] Oui &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Précisions : [À compléter])<br>
+                            <strong>Positionnement patient :</strong> [À compléter] <br>
+                            <strong>Localisation DMI autorisé :</strong> [À compléter] <br>
+                            <strong>Contrôle/réglage par un spécialiste :</strong> [ ] Cardiologue &nbsp;&nbsp; [ ] Neurochir &nbsp;&nbsp; [ ] Autre : [À compléter] <br>
+                            <strong>Surveillance pendant examen :</strong> [À compléter] <br>
+                            <strong>Autre :</strong> [À compléter]
+                        </div>
+
+                        <p style="margin-top: 15px;">
+                            <strong>Fait le :</strong> [À compléter] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Manipulateur :</strong> .......................... &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Médecin ok pour examen :</strong> ..........................
+                        </p>
+                    </div>
+                    ```
+                    """
+                    try:
+                        reponse_rapport = client.models.generate_content(model='gemini-2.5-flash', contents=[prompt_rapport])
+                        
+                        # LE "CHIRURGIEN" : On extrait uniquement ce qui est dans le bloc HTML
+                        html_brut = reponse_rapport.text
+                        match = re.search(r'```html(.*?)```', html_brut, re.DOTALL | re.IGNORECASE)
+                        if match:
+                            html_propre = match.group(1).strip()
+                        else:
+                            # Sécurité au cas où l'IA oublie quand même les balises
+                            html_propre = html_brut.replace("```html", "").replace("```", "").strip()
+                            
+                        # On force l'encadrement par une div si l'IA l'a accidentellement supprimé
+                        if not html_propre.startswith("<div"):
+                            html_propre = f"<div>{html_propre}</div>"
+                            
+                        st.session_state.rapport_final = html_propre
+                    except Exception as e:
+                        st.error(f"Erreur IA : {e}")
+
+        if st.session_state.etape_dmi >= 3 and st.session_state.rapport_final:
+            st.info(T("📋 Voici votre fiche au format visuel original. Vous pouvez la sélectionner et la copier pour le DPI.", "📋 Here is your form in its original visual format. You can select and copy it for the EPR."))
+            # IMPORTANT : L'affichage en HTML propre
+            st.markdown(st.session_state.rapport_final, unsafe_allow_html=True)
