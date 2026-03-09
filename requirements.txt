@@ -1,0 +1,6 @@
+streamlit
+numpy
+matplotlib
+Pillow
+google-genai
+streamlit-paste-button
