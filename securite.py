@@ -626,95 +626,32 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
                     Analyse IA : {st.session_state.fiche_ia}
 
                     CONSIGNES STRICTES :
-                    - Reproduis EXACTEMENT le code HTML ci-dessous. Ne change aucune balise, aucune couleur.
+                    - Reproduis EXACTEMENT le code HTML ci-dessous.
                     - Remplace les "[ ]" par "[X]" si la condition est validée.
                     - Remplace "[À compléter]" par les informations trouvées.
-                    - Mets OBLIGATOIREMENT ton résultat dans un bloc de code commençant par ```html et se terminant par ```.
+                    - N'ajoute AUCUN saut de ligne (touche Entrée) entre les balises HTML. Rédige le code de manière la plus compacte possible.
+                    - Ne génère aucun texte avant ou après, juste le HTML brut.
                     
                     MODÈLE HTML À REPRODUIRE ET REMPLIR :
 
-                    ```html
-                    <div style="font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: white; color: black;">
-                        <h2 style='text-align: center; color: #1f497d; text-decoration: underline;'>Fiche de compatibilité IRM pour patient porteur de DMI</h2>
-                        
-                        <p><strong>Patient</strong><br>
-                        <strong>Nom :</strong> [À compléter] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Prénom :</strong> [À compléter]<br>
-                        <strong>Né(e) le :</strong> [À compléter] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>examen IRM le :</strong> [À compléter] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>type :</strong> [À compléter]<br>
-                        <strong>Tél :</strong> [À compléter]</p>
-
-                        <div style="border: 2px solid black; padding: 10px; margin-bottom: 10px;">
-                            <h3 style="color: #4472c4; margin-top: 0;">Compatibilité IRM</h3>
-                            <p style="font-size: 18px; text-align: center; font-weight: bold;">
-                                [ ] MR Safe &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] MR Conditional &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] MR Unsafe
-                            </p>
-                            <p style="color: red; font-weight: bold; text-align: center; font-size: 18px;">
-                                Toute association de dispositifs médicaux non testés ensemble est considérée comme Unsafe
-                            </p>
-                        </div>
-
-                        <h3 style="color: #4472c4; text-decoration: underline;">Dispositifs Médicaux</h3>
-                        <table style="width: 100%; border-collapse: collapse; text-align: center;" border="1">
-                            <tr style="background-color: #f2f2f2;">
-                                <th style="padding: 5px;">Type</th><th style="padding: 5px;">Marque</th><th style="padding: 5px;">Référence</th><th style="padding: 5px;">Date de pose</th><th style="padding: 5px;">Compatibilité</th>
-                            </tr>
-                            <tr><td style="padding: 5px;">[À compléter]</td><td style="padding: 5px;">[À compléter]</td><td style="padding: 5px;">[À compléter]</td><td style="padding: 5px;">[À compléter]</td><td style="padding: 5px;">[À compléter]</td></tr>
-                            <tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr>
-                            <tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr>
-                        </table>
-
-                        <p style="margin-top: 15px;">
-                            <strong>Type de DMI :</strong> [ ] Actif <span style="color: red; font-weight: bold;">-&gt; Risque de dysfonctionnement</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Passif <br>
-                            <strong>Matériau ferromagnétique :</strong> [ ] Oui <span style="color: red; font-weight: bold;">-&gt; Risque d'attraction, de torsion...</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non <br>
-                            <strong>Matériau Conducteur :</strong> [ ] Oui <span style="color: red; font-weight: bold;">-&gt; Risque d'échauffement</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non
-                        </p>
-
-                        <div style="border: 2px solid black; padding: 15px;">
-                            <h3 style="color: #4472c4; text-decoration: underline; margin-top: 0;">Conditions préconisées par le constructeur</h3>
-                            
-                            <strong>Champ Magnétique statique max (B0) :</strong> [ ] 1.5 T &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] 3T <br>
-                            <strong>Gradients spatial max (T/m) :</strong> [À compléter] <br>
-                            <strong>Vitesse de montée des gradients (T/m/s) :</strong> [À compléter] <br>
-                            <strong>Amplitude max des gradients (mT/m) :</strong> [À compléter] <br>
-                            <strong>SAR :</strong> [ ] Niveau 1 (2,0 W/kg Corps et 3,2 W/kg Tête) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Niveau 2 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Autre : [À compléter]<br>
-                            <strong>B1+RMS :</strong> [ ] ≤ 2,8 µT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Autre : [À compléter] <br>
-                            <strong>Temps d'examen maximum (balayage RF) :</strong> [À compléter] <br><br>
-                            
-                            <strong>Antennes :</strong> [À compléter] <br>
-                            <strong>Zone d'exclusion :</strong> [ ] Oui &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Précisions : [À compléter])<br>
-                            <strong>Positionnement patient :</strong> [À compléter] <br>
-                            <strong>Localisation DMI autorisé :</strong> [À compléter] <br>
-                            <strong>Contrôle/réglage par un spécialiste :</strong> [ ] Cardiologue &nbsp;&nbsp; [ ] Neurochir &nbsp;&nbsp; [ ] Autre : [À compléter] <br>
-                            <strong>Surveillance pendant examen :</strong> [À compléter] <br>
-                            <strong>Autre :</strong> [À compléter]
-                        </div>
-
-                        <p style="margin-top: 15px;">
-                            <strong>Fait le :</strong> [À compléter] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Manipulateur :</strong> .......................... &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Médecin ok pour examen :</strong> ..........................
-                        </p>
-                    </div>
-                    ```
+                    <div style="font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: white; color: black;"><h2 style='text-align: center; color: #1f497d; text-decoration: underline;'>Fiche de compatibilité IRM pour patient porteur de DMI</h2><p><strong>Patient</strong><br><strong>Nom :</strong> [À compléter] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Prénom :</strong> [À compléter]<br><strong>Né(e) le :</strong> [À compléter] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>examen IRM le :</strong> [À compléter] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>type :</strong> [À compléter]<br><strong>Tél :</strong> [À compléter]</p><div style="border: 2px solid black; padding: 10px; margin-bottom: 10px;"><h3 style="color: #4472c4; margin-top: 0;">Compatibilité IRM</h3><p style="font-size: 18px; text-align: center; font-weight: bold;">[ ] MR Safe &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] MR Conditional &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] MR Unsafe</p><p style="color: red; font-weight: bold; text-align: center; font-size: 18px;">Toute association de dispositifs médicaux non testés ensemble est considérée comme Unsafe</p></div><h3 style="color: #4472c4; text-decoration: underline;">Dispositifs Médicaux</h3><table style="width: 100%; border-collapse: collapse; text-align: center;" border="1"><tr style="background-color: #f2f2f2;"><th style="padding: 5px;">Type</th><th style="padding: 5px;">Marque</th><th style="padding: 5px;">Référence</th><th style="padding: 5px;">Date de pose</th><th style="padding: 5px;">Compatibilité</th></tr><tr><td style="padding: 5px;">[À compléter]</td><td style="padding: 5px;">[À compléter]</td><td style="padding: 5px;">[À compléter]</td><td style="padding: 5px;">[À compléter]</td><td style="padding: 5px;">[À compléter]</td></tr><tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr><tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr></table><p style="margin-top: 15px;"><strong>Type de DMI :</strong> [ ] Actif <span style="color: red; font-weight: bold;">-&gt; Risque de dysfonctionnement</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Passif <br><strong>Matériau ferromagnétique :</strong> [ ] Oui <span style="color: red; font-weight: bold;">-&gt; Risque d'attraction, de torsion...</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non <br><strong>Matériau Conducteur :</strong> [ ] Oui <span style="color: red; font-weight: bold;">-&gt; Risque d'échauffement</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non</p><div style="border: 2px solid black; padding: 15px;"><h3 style="color: #4472c4; text-decoration: underline; margin-top: 0;">Conditions préconisées par le constructeur</h3><strong>Champ Magnétique statique max (Bo) :</strong> [ ] 1.5 T &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] 3T <br><strong>Gradients spatial max (T/m) :</strong> [À compléter] <br><strong>Vitesse de montée des gradients (T/m/s) :</strong> [À compléter] <br><strong>Amplitude max des gradients (mT/m) :</strong> [À compléter] <br><strong>SAR :</strong> [ ] Niveau 1 (2,0 W/kg Corps et 3,2 W/kg Tête) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Niveau 2 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Autre : [À compléter]<br><strong>B1+RMS :</strong> [ ] ≤ 2,8 µT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Autre : [À compléter] <br><strong>Temps d'examen maximum (balayage RF) :</strong> [À compléter] <br><br><strong>Antennes :</strong> [À compléter] <br><strong>Zone d'exclusion :</strong> [ ] Oui &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Précisions : [À compléter])<br><strong>Positionnement patient :</strong> [À compléter] <br><strong>Localisation DMI autorisé :</strong> [À compléter] <br><strong>Contrôle/réglage par un spécialiste :</strong> [ ] Cardiologue &nbsp;&nbsp; [ ] Neurochir &nbsp;&nbsp; [ ] Autre : [À compléter] <br><strong>Surveillance pendant examen :</strong> [À compléter] <br><strong>Autre :</strong> [À compléter]</div><p style="margin-top: 15px;"><strong>Fait le :</strong> [À compléter] &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Manipulateur :</strong> .......................... &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Médecin ok pour examen :</strong> ..........................</p></div>
                     """
                     try:
                         reponse_rapport = client.models.generate_content(model='gemini-2.5-flash', contents=[prompt_rapport])
                         
-                        # LE "CHIRURGIEN" : On extrait uniquement ce qui est dans le bloc HTML
+                        # LE "CHIRURGIEN" HACK POUR STREAMLIT
                         html_brut = reponse_rapport.text
-                        match = re.search(r'```html(.*?)```', html_brut, re.DOTALL | re.IGNORECASE)
-                        if match:
-                            html_propre = match.group(1).strip()
-                        else:
-                            # Sécurité au cas où l'IA oublie quand même les balises
-                            html_propre = html_brut.replace("```html", "").replace("```", "").strip()
-                            
-                        # On force l'encadrement par une div si l'IA l'a accidentellement supprimé
-                        if not html_propre.startswith("<div"):
-                            html_propre = f"<div>{html_propre}</div>"
-                            
+                        html_brut = html_brut.replace("```html", "").replace("```", "").strip()
+                        
+                        # C'est cette ligne qui sauve tout ! Streamlit annule le rendu dès qu'il y a un saut de ligne.
+                        # On supprime donc TOUS les sauts de ligne invisibles générés par l'IA.
+                        html_propre = html_brut.replace('\n', '').replace('\r', '')
+                        
                         st.session_state.rapport_final = html_propre
                     except Exception as e:
                         st.error(f"Erreur IA : {e}")
 
         if st.session_state.etape_dmi >= 3 and st.session_state.rapport_final:
             st.info(T("📋 Voici votre fiche au format visuel original. Vous pouvez la sélectionner et la copier pour le DPI.", "📋 Here is your form in its original visual format. You can select and copy it for the EPR."))
-            # IMPORTANT : L'affichage en HTML propre
+            # IMPORTANT : Affichage HTML forcé
             st.markdown(st.session_state.rapport_final, unsafe_allow_html=True)
