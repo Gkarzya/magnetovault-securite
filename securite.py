@@ -536,18 +536,17 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
         if btn_rechercher:
             if nom_dmi or image_fournie:
                 st.session_state.etape_dmi = 1
-                with st.spinner(T("Analyse approfondie par Gemini en cours...", "Deep analysis by Gemini in progress...")):
+                with st.spinner(T("Analyse par Gemini en cours...", "Analysis by Gemini in progress...")):
                     
                     prompt_sources = f"""
-                    Agis comme un expert en sécurité IRM et dispositifs médicaux implantables (DMI).
+                    INSTRUCTION SYSTÈME : Tu es un expert médical de très haut niveau en sécurité IRM, spécialisé dans l'analyse pointue des DMI. 
+                    Ta mission est de fournir une aide décisionnelle RICHE, DÉTAILLÉE et EXHAUSTIVE pour le manipulateur IRM.
+                    
+                    RÈGLE ABSOLUE : Tu es une machine sans bavardage. INTERDICTION FORMELLE d'écrire une phrase d'introduction ou de conclusion (ex: "Voici les informations...", "En tant qu'expert..."). Commence IMMÉDIATEMENT par le titre "### 🆔 Identification du Dispositif".
+                    
                     Dispositif identifié : "{nom_dmi if nom_dmi else "Aucun texte saisi. LIS L'IMAGE CI-JOINTE."}"
                     
-                    MISSION : Fournir un résumé clinique ultra-pertinent et des liens d'accès directs aux manuels du fabricant.
-                    Utilise toute l'étendue de ta base de données pour donner les informations les plus précises possibles dès maintenant. Ne sois pas trop restrictif, donne les informations cliniques que tu connais (SAR, B0, mode IRM, etc.).
-                    
-                    RÈGLE ABSOLUE : N'ajoute AUCUNE phrase d'introduction, de politesse ou de conclusion (ex: Ne dis surtout pas "Voici le résumé..."). Génère DIRECTEMENT ET UNIQUEMENT le format Markdown ci-dessous.
-                    
-                    Format de réponse OBLIGATOIRE (en Markdown) :
+                    MODÈLE À REMPLIR OBLIGATOIREMENT :
                     
                     ### 🆔 Identification du Dispositif
                     * **Fabricant :** [Nom du constructeur]
@@ -555,13 +554,13 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
                     * **Type de DMI :** [Actif / Passif]
                     
                     ### 🧠 Analyse Préliminaire de Sécurité (Base IA)
+                    *(Sois extrêmement descriptif ici : détaille les limites de SAR, B0, les zones d'exclusion, et les modes cliniques spécifiques à activer avant l'examen)*
                     * 🧲 **Champ Magnétique (B0) :** [ex: 1.5T, 3T, ou Contre-indiqué]
-                    * 🌡️ **SAR Max / B1+rms :** [ex: 2.0 W/kg, 2.8 µT, etc.]
-                    * ⚠️ **Restrictions & Vigilance :** [Détaille les zones d'exclusion, le mode IRM à activer, le temps de scan max, etc.]
+                    * 🌡️ **SAR Max / B1+rms :** [Détaille les limites précises]
+                    * ⚠️ **Restrictions & Vigilance :** [Détaille les zones anatomiques interdites, l'obligation d'un mode SureScan ou d'un réglage cardiologue, le temps d'attente post-opératoire, etc.]
                     *(Note: Ces informations sont des indications préliminaires fournies par l'IA. La validation stricte via le manuel officiel reste obligatoire).*
                     
                     ### 🎯 Liens d'Accès Direct (Sources Constructeur)
-                    Trouve les liens les plus directs et pertinents vers les documents officiels.
                     * 🏛️ **Portail Officiel / Manuel :** [Génère l'URL la plus directe possible vers le manuel IRM ou le portail constructeur de ce dispositif]
                     * 🔍 **Recherche Spécifique :** [Génère un lien de recherche Google très ciblé, ex: https://www.google.com/search?q=%22nom_du_fabricant%22+%22nom_du_modele%22+%22MRI+Safety%22+manual+OR+pdf]
                     * 🌍 **Base MRISafety.com :** [Lien vers la recherche MRISafety](https://www.mrisafety.com/TheList/Search?q={nom_dmi.replace(' ', '+') if nom_dmi else 'implant'})
@@ -610,13 +609,13 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
                     with st.spinner(T("Extraction ultra-rapide des constantes physiques...", "Ultra-fast extraction of physical constants...")):
                         
                         prompt_analyse = f"""
-                        Agis comme un expert médico-légal en sécurité IRM. 
+                        INSTRUCTION SYSTÈME : Extraction stricte. AUCUNE phrase d'introduction ni de conclusion. Ne dis pas un seul mot en dehors des puces demandées.
                         Analyse ce texte officiel du fabricant et extrais UNIQUEMENT les conditions de sécurité pour l'IRM.
                         Texte du fabricant : "{texte_manuel}"
 
                         RÈGLES STRICTES :
-                        - Rendu sous forme de liste à puces.
-                        - AUCUNE phrase d'introduction ou de conclusion.
+                        - Rendu sous forme de liste à puces uniquement.
+                        - Commence DIRECTEMENT par "* 🧲 **Champ Magnétique Autorisé :**".
                         - Si une information est absente du texte, écris "Non spécifié".
 
                         Génère UNIQUEMENT ce format :
@@ -651,7 +650,7 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
                 st.session_state.etape_dmi = 3
                 with st.spinner(T("Création de la mise en page originale...", "Creating original layout...")):
                     prompt_rapport = f"""
-                    Agis comme un assistant médical expert. 
+                    INSTRUCTION SYSTÈME : Tu es un processeur de code HTML muet. 
                     Tu dois remplir la fiche ci-dessous en utilisant ces données :
                     Dispositif : {nom_dmi}
                     Données constructeur : {texte_manuel}
@@ -663,7 +662,7 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
                     - Insère les informations techniques trouvées. 
                     - S'il manque une information concernant le patient (Nom, prénom, date...), LAISSE L'ESPACE VIDE. N'écris JAMAIS "[À compléter]".
                     - N'ajoute AUCUN saut de ligne (touche Entrée) entre les balises HTML.
-                    - Ne génère aucun texte avant ou après, juste le HTML brut.
+                    - Ne génère AUCUN texte avant ou après le bloc de code HTML, aucune introduction, aucune explication.
                     
                     MODÈLE HTML À REPRODUIRE ET REMPLIR :
                     <div style="font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: white; color: black;"><h2 style='text-align: center; color: #1f497d; text-decoration: underline;'>Fiche de compatibilité IRM pour patient porteur de DMI</h2><p><strong>Patient</strong><br><strong>Nom :</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Prénom :</strong> <br><strong>Né(e) le :</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>examen IRM le :</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>type :</strong> <br><strong>Tél :</strong> </p><div style="border: 2px solid black; padding: 10px; margin-bottom: 10px;"><h3 style="color: #4472c4; margin-top: 0;">Compatibilité IRM</h3><p style="font-size: 18px; text-align: center; font-weight: bold;">[ ] MR Safe &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] MR Conditional &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] MR Unsafe</p><p style="color: red; font-weight: bold; text-align: center; font-size: 18px;">Toute association de dispositifs médicaux non testés ensemble est considérée comme Unsafe</p></div><h3 style="color: #4472c4; text-decoration: underline;">Dispositifs Médicaux</h3><table style="width: 100%; border-collapse: collapse; text-align: center;" border="1"><tr style="background-color: #f2f2f2;"><th style="padding: 5px;">Type</th><th style="padding: 5px;">Marque</th><th style="padding: 5px;">Référence</th><th style="padding: 5px;">Date de pose</th><th style="padding: 5px;">Compatibilité</th></tr><tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr><tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr><tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr></table><p style="margin-top: 15px;"><strong>Type de DMI :</strong> [ ] Actif <span style="color: red; font-weight: bold;">-&gt; Risque de dysfonctionnement</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Passif <br><strong>Matériau ferromagnétique :</strong> [ ] Oui <span style="color: red; font-weight: bold;">-&gt; Risque d'attraction, de torsion...</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non <br><strong>Matériau Conducteur :</strong> [ ] Oui <span style="color: red; font-weight: bold;">-&gt; Risque d'échauffement</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non</p><div style="border: 2px solid black; padding: 15px;"><h3 style="color: #4472c4; text-decoration: underline; margin-top: 0;">Conditions préconisées par le constructeur</h3><strong>Champ Magnétique statique max (B0) :</strong> [ ] 1.5 T &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] 3T <br><strong>Gradients spatial max (T/m) :</strong> <br><strong>Vitesse de montée des gradients (T/m/s) :</strong> <br><strong>Amplitude max des gradients (mT/m) :</strong> <br><strong>SAR :</strong> [ ] Niveau 1 (2,0 W/kg Corps et 3,2 W/kg Tête) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Niveau 2 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Autre : <br><strong>B1+RMS :</strong> [ ] ≤ 2,8 µT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Autre : <br><strong>Temps d'examen maximum (balayage RF) :</strong> <br><br><strong>Antennes :</strong> <br><strong>Zone d'exclusion :</strong> [ ] Oui &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Précisions : )<br><strong>Positionnement patient :</strong> <br><strong>Localisation DMI autorisé :</strong> <br><strong>Contrôle/réglage par un spécialiste :</strong> [ ] Cardiologue &nbsp;&nbsp; [ ] Neurochir &nbsp;&nbsp; [ ] Autre : <br><strong>Surveillance pendant examen :</strong> <br><strong>Autre :</strong> </div><p style="margin-top: 15px;"><strong>Fait le :</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Manipulateur :</strong> .......................... &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Médecin ok pour examen :</strong> ..........................</p></div>
