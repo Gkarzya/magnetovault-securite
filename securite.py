@@ -67,6 +67,35 @@ def get_base64_image(image_path):
         return base64.b64encode(img_file.read()).decode()
 
 # =========================================================
+# FONCTION DE REPLI SUR MESURE (GÉNÉRATION 2.5 & LATEST)
+# =========================================================
+def generer_avec_repli(client, contenus):
+    """
+    Tente la génération sur les modèles ultra-récents autorisés par la clé.
+    """
+    modeles_a_tester = [
+        'gemini-2.5-flash',
+        'gemini-flash-latest',
+        'gemini-2.5-pro',
+        'gemini-pro-latest'
+    ]
+    
+    for modele in modeles_a_tester:
+        try:
+            return client.models.generate_content(model=modele, contents=contenus)
+        except Exception as e:
+            erreur_str = str(e)
+            # 503/529 = Serveur surchargé | 404 = Modèle inaccessible
+            if "503" in erreur_str or "529" in erreur_str or "404" in erreur_str:
+                continue # On passe au modèle suivant en silence
+            else:
+                # Vraie erreur (ex: image corrompue)
+                raise e
+                
+    # Si la boucle se termine sans succès, c'est un embouteillage mondial.
+    raise Exception("⚠️ Les serveurs de l'IA Google sont tous temporairement surchargés (Erreur 503). Veuillez patienter 1 minute et réessayer.")
+
+# =========================================================
 # ÉCRAN DE CONNEXION (MUR DE SÉCURITÉ)
 # =========================================================
 if not st.session_state.authenticated:
@@ -104,8 +133,6 @@ if not st.session_state.authenticated:
 # =========================================================
 # NAVIGATION (MENU LATÉRAL) & TRADUCTION
 # =========================================================
-# Si le code arrive ici, c'est que l'utilisateur est connecté !
-
 if os.path.exists("logo_mia.jpg"):
     st.sidebar.image("logo_mia.jpg", use_container_width=True)
 else:
@@ -600,13 +627,10 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
                             st.error(f"Erreur image : {e}")
 
                     try:
-                        reponse_src = client.models.generate_content(model='gemini-2.5-flash', contents=contenu_etape1)
+                        reponse_src = generer_avec_repli(client, contenu_etape1)
                         st.session_state.sources_ia = reponse_src.text
                     except Exception as e:
-                        if "503" in str(e):
-                            st.warning("⚠️ Les serveurs de l'IA (Google) sont temporairement surchargés. Veuillez patienter 1 minute et réessayer.")
-                        else:
-                            st.error(f"Erreur IA : {e}")
+                        st.error(f"Erreur IA : {e}")
             else:
                 st.warning(T("Veuillez saisir un nom ou fournir une photo.", "Please enter a name or provide a photo."))
                 
@@ -644,13 +668,10 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
                         * 🚫 **Contraintes cliniques / Exclusions :** [Ex: Scan de la tête uniquement, mode normal obligatoire, etc.]
                         """
                         try:
-                            reponse_analyse = client.models.generate_content(model='gemini-2.5-flash', contents=[prompt_analyse])
+                            reponse_analyse = generer_avec_repli(client, [prompt_analyse])
                             st.session_state.fiche_ia = reponse_analyse.text
                         except Exception as e:
-                            if "503" in str(e):
-                                st.warning("⚠️ Serveurs IA occupés. Veuillez réessayer.")
-                            else:
-                                st.error(f"Erreur IA : {e}")
+                            st.error(f"Erreur IA : {e}")
                 else:
                     st.warning(T("Veuillez coller le texte du manuel avant d'analyser.", "Please paste the manual text before analyzing."))
 
@@ -692,7 +713,7 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
                     <div style="font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px; border-radius: 5px; background-color: white; color: black;"><h2 style='text-align: center; color: #1f497d; text-decoration: underline;'>Fiche de compatibilité IRM pour patient porteur de DMI</h2><p><strong>Patient</strong><br><strong>Nom :</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Prénom :</strong> <br><strong>Né(e) le :</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>examen IRM le :</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>type :</strong> <br><strong>Tél :</strong> </p><div style="border: 2px solid black; padding: 10px; margin-bottom: 10px;"><h3 style="color: #4472c4; margin-top: 0;">Compatibilité IRM</h3><p style="font-size: 18px; text-align: center; font-weight: bold;">[ ] MR Safe &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] MR Conditional &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] MR Unsafe</p><p style="color: red; font-weight: bold; text-align: center; font-size: 18px;">Toute association de dispositifs médicaux non testés ensemble est considérée comme Unsafe</p></div><h3 style="color: #4472c4; text-decoration: underline;">Dispositifs Médicaux</h3><table style="width: 100%; border-collapse: collapse; text-align: center;" border="1"><tr style="background-color: #f2f2f2;"><th style="padding: 5px;">Type</th><th style="padding: 5px;">Marque</th><th style="padding: 5px;">Référence</th><th style="padding: 5px;">Date de pose</th><th style="padding: 5px;">Compatibilité</th></tr><tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr><tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr><tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr><tr><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td><td style="padding: 5px;">&nbsp;</td></tr></table><p style="margin-top: 15px;"><strong>Type de DMI :</strong> [ ] Actif <span style="color: red; font-weight: bold;">-&gt; Risque de dysfonctionnement</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Passif <br><strong>Matériau ferromagnétique :</strong> [ ] Oui <span style="color: red; font-weight: bold;">-&gt; Risque d'attraction, de torsion...</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non <br><strong>Matériau Conducteur :</strong> [ ] Oui <span style="color: red; font-weight: bold;">-&gt; Risque d'échauffement</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non</p><div style="border: 2px solid black; padding: 15px;"><h3 style="color: #4472c4; text-decoration: underline; margin-top: 0;">Conditions préconisées par le constructeur</h3><strong>Champ Magnétique statique max (B0) :</strong> [ ] 1.5 T &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] 3T <br><strong>Gradients spatial max (T/m) :</strong> <br><strong>Vitesse de montée des gradients (T/m/s) :</strong> <br><strong>Amplitude max des gradients (mT/m) :</strong> <br><strong>SAR :</strong> [ ] Niveau 1 (2,0 W/kg Corps et 3,2 W/kg Tête) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Niveau 2 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Autre : <br><strong>B1+RMS :</strong> [ ] ≤ 2,8 µT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Autre : <br><strong>Temps d'examen maximum (balayage RF) :</strong> <br><br><strong>Antennes :</strong> <br><strong>Zone d'exclusion :</strong> [ ] Oui &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ ] Non &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Précisions : )<br><strong>Positionnement patient :</strong> <br><strong>Localisation DMI autorisé :</strong> <br><strong>Contrôle/réglage par un spécialiste :</strong> [ ] Cardiologue &nbsp;&nbsp; [ ] Neurochir &nbsp;&nbsp; [ ] Autre : <br><strong>Surveillance pendant examen :</strong> <br><strong>Autre :</strong> </div><p style="margin-top: 15px;"><strong>Fait le :</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Manipulateur :</strong> .......................... &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Médecin ok pour examen :</strong> ..........................</p></div>
                     """
                     try:
-                        reponse_rapport = client.models.generate_content(model='gemini-2.5-flash', contents=[prompt_rapport])
+                        reponse_rapport = generer_avec_repli(client, [prompt_rapport])
                         
                         # Nettoyage du Markdown au cas où
                         html_brut = reponse_rapport.text
@@ -753,10 +774,7 @@ elif page == T("🛡️ Module Sécurité DMI", "🛡️ DMI Safety Module"):
                         st.session_state.rapport_final_html = html_iframe
                         
                     except Exception as e:
-                        if "503" in str(e):
-                            st.warning("⚠️ Serveurs IA occupés. Veuillez réessayer.")
-                        else:
-                            st.error(f"Erreur IA : {e}")
+                        st.error(f"Erreur IA : {e}")
 
         if st.session_state.etape_dmi >= 3 and st.session_state.rapport_final_html:
             st.success(T("✅ Fiche générée avec succès !", "✅ Form generated successfully!"))
